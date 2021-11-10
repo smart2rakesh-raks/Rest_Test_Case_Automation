@@ -33,7 +33,7 @@ public class AutomationDemo extends Base_class{
         while (m.find()) {
             l.add(m.group(1));
         }
-        
+
         String result = l.stream().map(n -> String.valueOf(n)).collect(Collectors.joining(",", "{", "}"));
         JsonObject jsonObject = new JsonParser().parse(result).getAsJsonObject();
         String access_token = jsonObject.get("access_token").getAsString();
