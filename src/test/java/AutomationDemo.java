@@ -17,11 +17,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+
 public class AutomationDemo extends Base_class{
 
 
     @Test
-    public String AdminTokenPost() throws ParseException  {
+    public String postMethodAdminToken() throws ParseException  {
         ExtentTest test = extent.createTest("Rest Test Case Get Access Token");
         test.log(Status.INFO, "Starting test case");
 
@@ -33,7 +34,6 @@ public class AutomationDemo extends Base_class{
         while (m.find()) {
             l.add(m.group(1));
         }
-
         String result = l.stream().map(n -> String.valueOf(n)).collect(Collectors.joining(",", "{", "}"));
         JsonObject jsonObject = new JsonParser().parse(result).getAsJsonObject();
         String access_token = jsonObject.get("access_token").getAsString();
@@ -43,27 +43,23 @@ public class AutomationDemo extends Base_class{
         test.pass("Access token generated successfully.");
         test.pass("Correct status code returned.");
         test.info("Test completed");
-
         return access_token;
     }
 
     @Test
-    public void AdminLoginPost() throws ParseException {
+    public void postMethodAdminLogin() throws ParseException {
 
         ExtentTest test = extent.createTest("Rest Test Case Admin login");
         test.log(Status.INFO, "Starting test case");
 
-        String access_token = AdminTokenPost();
+        String access_token = postMethodAdminToken();
+
         // post for admin login
         Response LoginResponse = RestAssured.given().auth()
                 .oauth2(access_token).header("Content-Type", "application/json")
                 .body(requestBody).when().post("http://rest-api.upskills.in/api/rest_admin/login");
 
         String AdminLoginbody = LoginResponse.getBody().asString();
-        LoginResponse.prettyPrint();
-        int statusCode = LoginResponse.getStatusCode();
-        System.out.println("Status code: "+statusCode);
-
         Pattern login_p = Pattern.compile("\\{([^{}]*)\\}");
         Matcher login_m = login_p.matcher(AdminLoginbody);
         List<String> login_l = new ArrayList<String>();
@@ -76,31 +72,30 @@ public class AutomationDemo extends Base_class{
 
         test.pass("Login Successfully");
 
+        int statusCode = LoginResponse.getStatusCode();
         Assert.assertEquals(statusCode, 200, "Correct status code returned");
         Assert.assertEquals(username, "upskills_admin", "Correct username returned");
         test.pass("Correct status code and Correct username returned ");
         test.info("Test completed");
-
     }
 
     @Test
-    public void AdminUserDetailsGet() throws ParseException {
+    public void getMethodAdminUserDetails() throws ParseException {
 
         ExtentTest test = extent.createTest("Rest Test Case Admin login user details");
         test.log(Status.INFO, "Starting test case");
 
         //Login
-        String access_token = AdminTokenPost();
+        String access_token = postMethodAdminToken();
         Response LoginResponse = RestAssured.given().auth()
                 .oauth2(access_token).header("Content-Type", "application/json")
                 .body(requestBody).when().post("http://rest-api.upskills.in/api/rest_admin/login");
 
         test.pass("Login Successfully");
 
-        //Get request
+        //Get Method
         Response AdminUserData  = RestAssured.given().auth()
                 .oauth2(access_token).get("http://rest-api.upskills.in/api/rest_admin/user");
-
         String AdminLoginbodyget = AdminUserData.getBody().asString();
         Pattern login_pget = Pattern.compile("\\{([^{}]*)\\}");
         Matcher login_mget = login_pget.matcher(AdminLoginbodyget);
@@ -112,11 +107,9 @@ public class AutomationDemo extends Base_class{
         JsonObject AdminLoginjsonObjectget = new JsonParser().parse(AdminLoginjsonget).getAsJsonObject();
         String username = AdminLoginjsonObjectget.get("username").getAsString();
 
-        AdminUserData.prettyPrint();
-        int statusCode = AdminUserData.getStatusCode();
-        System.out.println("Status code: "+statusCode);
-
         test.pass("Fetched Details Successfully");
+
+        int statusCode = AdminUserData.getStatusCode();
         Assert.assertEquals(statusCode, 200, "Correct status code returned");
         Assert.assertEquals(username, "upskills_admin", "Correct username returned");
         test.pass("Correct status code and Correct username returned ");
@@ -124,13 +117,13 @@ public class AutomationDemo extends Base_class{
     }
 
     @Test
-    public void AdminAddProductCategoryandsubcategory() throws ParseException {
+    public void postMethodAdminAddProductCategoryandSubCategory() throws ParseException {
 
         ExtentTest test = extent.createTest("Rest Test Case Add product,sub category");
         test.log(Status.INFO, "Starting test case");
 
-        //Login
-        String access_token = AdminTokenPost();
+        //Login Method
+        String access_token = postMethodAdminToken();
         Response LoginResponse = RestAssured.given().auth()
                 .oauth2(access_token).header("Content-Type", "application/json")
                 .body(requestBody).when().post("http://rest-api.upskills.in/api/rest_admin/login");
@@ -141,56 +134,51 @@ public class AutomationDemo extends Base_class{
                 .oauth2(access_token).header("Content-Type", "application/json")
                 .body(Category).when().post("http://rest-api.upskills.in/api/rest_admin/categories");
 
-        AdminProductCategoryResponse.prettyPrint();
-        int statusCode = AdminProductCategoryResponse.getStatusCode();
-        System.out.println("Status code: "+statusCode);
-
-        Assert.assertEquals(statusCode, 200, "Correct status code returned");
         test.pass("Posted Category successfully.");
+
+        int statusCode = AdminProductCategoryResponse.getStatusCode();
+        Assert.assertEquals(statusCode, 200, "Correct status code returned");
 
         //Post subcategory
         Response AdminsubCategoryResponse = RestAssured.given().auth()
                 .oauth2(access_token).header("Content-Type", "application/json")
                 .body(subCategory).when().post("http://rest-api.upskills.in/api/rest_admin/categories");
 
-        AdminsubCategoryResponse.prettyPrint();
-        int statusCodeSub = AdminsubCategoryResponse.getStatusCode();
-        System.out.println("Status code: "+statusCodeSub);
-        Assert.assertEquals(statusCodeSub, 200, "Correct status code returned");
         test.pass("Posted SubCategory successfully.");
+
+        int statusCodeSub = AdminsubCategoryResponse.getStatusCode();
+        Assert.assertEquals(statusCodeSub, 200, "Correct status code returned");
 
         //Post Product
         Response AdminproductResponse = RestAssured.given().auth()
                 .oauth2(access_token).header("Content-Type", "application/json")
                 .body(product).when().post("http://rest-api.upskills.in/api/rest_admin/products");
 
-        AdminproductResponse.prettyPrint();
-        int statusCodepro = AdminsubCategoryResponse.getStatusCode();
-        System.out.println("Status code: "+statusCodepro);
-        Assert.assertEquals(statusCodepro, 200, "Correct status code returned");
         test.pass("Posted Product successfully.");
+
+        int statusCodepro = AdminproductResponse.getStatusCode();
+        Assert.assertEquals(statusCodepro, 200, "Correct status code returned");
         test.pass("Correct status code returned ");
         test.info("Test completed");
 
     }
 
     @Test
-    public void AdminAddcustomerPost() throws ParseException {
+    public void postMethodAdminAddCustomer() throws ParseException {
         ExtentTest test = extent.createTest("Rest Test Case Add new customer,product then create a new order");
         test.log(Status.INFO, "Starting test case");
 
         //Login
-        String access_token = AdminTokenPost();
+        String access_token = postMethodAdminToken();
         Response LoginResponse = RestAssured.given().auth()
                 .oauth2(access_token).header("Content-Type", "application/json")
                 .body(requestBody).when().post("http://rest-api.upskills.in/api/rest_admin/login");
         test.pass("Login Successfully");
 
-        //post for customer
+        //post method for customer
         Response AdmincustomerResponse = RestAssured.given().auth()
                 .oauth2(access_token).header("Content-Type", "application/json")
                 .body(customer).when().post("http://rest-api.upskills.in/api/rest_admin/customers");
-
         String body = AdmincustomerResponse.getBody().asString();
         Pattern p = Pattern.compile("\\{([^{}]*)\\}");
         Matcher m = p.matcher(body);
@@ -201,19 +189,17 @@ public class AutomationDemo extends Base_class{
         String result = l.stream().map(n -> String.valueOf(n)).collect(Collectors.joining(",", "{", "}"));
         JsonObject jsonObject = new JsonParser().parse(result).getAsJsonObject();
         String id = jsonObject.get("id").getAsString();
-
         Configuration configuration = Configuration.builder().jsonProvider(new JacksonJsonNodeJsonProvider())
                 .mappingProvider(new JacksonMappingProvider()).build();
-
         DocumentContext json = JsonPath.using(configuration).parse(order);
         String jsonPath = "customer.customer_id";
         String newValue = id;
         String admincustomer = json.set(jsonPath, newValue).jsonString();
-        System.out.println(id);
-        int statusCodecustome = AdmincustomerResponse.getStatusCode();
-        System.out.println("Status code: "+statusCodecustome);
-        Assert.assertEquals(statusCodecustome, 200, "Correct status code returned");
+
         test.pass("New Customer added Successfully");
+
+        int statusCodecustome = AdmincustomerResponse.getStatusCode();
+        Assert.assertEquals(statusCodecustome, 200, "Correct status code returned");
 
 
         //post for product
@@ -238,9 +224,7 @@ public class AutomationDemo extends Base_class{
         String adminnewValue = adminid;
         String adorder = pjson.set(adminjsonPath, adminnewValue).jsonString();
 
-        System.out.println(adminid);
         int statusCodeproduct = AdmincustomerResponse.getStatusCode();
-        System.out.println("Status code: "+statusCodeproduct);
         Assert.assertEquals(statusCodeproduct, 200, "Correct status code returned");
         test.pass("New product added Successfully");
 
@@ -248,46 +232,35 @@ public class AutomationDemo extends Base_class{
         Response AdminorderResponse = RestAssured.given().auth()
                 .oauth2(access_token).header("Content-Type", "application/json")
                 .body(adorder).when().post("http://rest-api.upskills.in/api/rest_admin/orderadmin");
-        String orderbody = AdminorderResponse.getBody().asString();
-        Pattern orderp = Pattern.compile("\\{([^{}]*)\\}");
-        Matcher orderm = orderp.matcher(orderbody);
-        List<String> orderl = new ArrayList<String>();
-        while (orderm.find()) {
-            orderl.add(orderm.group(1));
-        }
-        String orderresult = orderl.stream().map(n -> String.valueOf(n)).collect(Collectors.joining(",", "{", "}"));
-        JsonObject orderjsonObject = new JsonParser().parse(orderresult).getAsJsonObject();
-        String orderid = orderjsonObject.get("id").getAsString();
 
-        System.out.println(orderid);
-        int statusCodeorder = AdmincustomerResponse.getStatusCode();
-        System.out.println("Status code: "+statusCodeorder);
+        int statusCodeorder = AdminorderResponse.getStatusCode();
         Assert.assertEquals(statusCodeorder, 200, "Correct status code returned");
         test.pass("New order created Successfully");
+        test.pass("Correct status code returned ");
         test.info("Test completed");
 
     }
 
     @Test
-    public void AdminLogoutPost() throws ParseException {
+    public void postMethodAdminLogout() throws ParseException {
         ExtentTest test = extent.createTest("Rest Test Case Admin logout");
         test.log(Status.INFO, "Starting test case");
-        //Login
-        String access_token = AdminTokenPost();
+
+        //Post for Login
+        String access_token = postMethodAdminToken();
         Response LoginResponse = RestAssured.given().auth()
                 .oauth2(access_token).header("Content-Type", "application/json")
                 .body(requestBody).when().post("http://rest-api.upskills.in/api/rest_admin/login");
         test.pass("Login Successfully");
 
+        //Post for logout
         Response AdminLogoutResponse = RestAssured.given().auth()
                 .oauth2(access_token).post("http://rest-api.upskills.in/api/rest_admin/logout");
-        AdminLogoutResponse.prettyPrint();
 
         int statusCode = AdminLogoutResponse.getStatusCode();
-        System.out.println("Status code: "+statusCode);
         Assert.assertEquals(statusCode, 200, "Correct status code returned");
         test.pass("Log out Successfully");
+        test.pass("Correct status code returned ");
         test.info("Test completed");
-
     }
 }

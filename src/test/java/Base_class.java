@@ -50,7 +50,7 @@ public class Base_class {
     String customer = "{\n" +
             "\"firstname\": \"Ram\",\n" +
             "\"lastname\": \"K\",\n" +
-            "\"email\": \"demo6@gmail.com\",\n" +
+            "\"email\": \"raks@gmail.com\",\n" +
             "\"password\": \"password\",\n" +
             "\"confirm\": \"password\", \n" +
             "\"telephone\": \"1541-754-3010\"\n" +
